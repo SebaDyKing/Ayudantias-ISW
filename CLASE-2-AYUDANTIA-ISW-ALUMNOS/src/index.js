@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import { AppDataSource, connectDB } from "./config/configDB.js";
 import { routerApi } from "./routes/index.routes.js";
+import {HOST,DB_PORT} from "./config/configDB.js"
 
 const app = express();
 app.use(express.json());
@@ -18,10 +19,8 @@ connectDB()
     // Carga todas las rutas de la aplicación
     routerApi(app);
 
-    // Levanta el servidor Express
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`Servidor iniciado en http://localhost:${PORT}`);
+    app.listen(DB_PORT, () => {
+      console.log(`Servidor iniciado en ${HOST}:${DB_PORT}`);
     });
   })
   .catch((error) => {
