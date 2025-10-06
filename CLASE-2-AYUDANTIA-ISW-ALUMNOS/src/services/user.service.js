@@ -7,9 +7,12 @@ const userRepository = AppDataSource.getRepository(User);
 export async function createUser(data) {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
+
   const newUser = userRepository.create({
     email: data.email,
     password: hashedPassword,
+    rut: data.rut,
+    nombre: data.nombre,
   });
 
   return await userRepository.save(newUser);
@@ -17,4 +20,8 @@ export async function createUser(data) {
 
 export async function findUserByEmail(email) {
   return await userRepository.findOneBy({ email });
+}
+
+export async function findUserByRut(rut) {
+  return await userRepository.findOneBy({ rut });
 }

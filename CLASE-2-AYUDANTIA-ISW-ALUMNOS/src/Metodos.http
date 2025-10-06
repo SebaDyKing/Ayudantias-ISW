@@ -1,0 +1,12 @@
+
+
+
+### Recuperar Pelicula
+GET http://localhost:3000/api/auth/register 
+
+{
+"email" : "admin1@user.com",
+"password" : "1234",
+"rut" : "12.345.678-5",
+"name" : "Admin1"
+}

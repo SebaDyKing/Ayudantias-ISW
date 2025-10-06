@@ -1,6 +1,7 @@
 import { handleSuccess, handleErrorClient, handleErrorServer } from "../Handlers/responseHandlers.js";
 import { AppDataSource } from "../config/configDB.js";
 import { User } from "../entities/User.entity.js"; 
+import { validatePartialUser } from "../validations/user.validation.js";
 import bcrypt from "bcrypt";
 
 export function getPublicProfile(req, res) {
@@ -20,12 +21,14 @@ export function getPrivateProfile(req, res) {
 
 export async function updateProfile(req, res) {
   try{
-    const userId = req.user.sub;
-    const {email,password} = req.body;
+    const {error,value} = validatePartialUser(req.body);
 
-    if(!email && !password){
-      return handleErrorClient(res, 400, "Al menos un campo (email o password) debe ser proporcionado para actualizar el perfil");
+    if(error){
+      const errorMessages = error.details.map((detail) => detail.message);
+      return handleErrorClient(res, 400, "Error de validación", errorMessages);
     }
+
+    const userId = req.user.sub;
     const userRepository = AppDataSource.getRepository(User);
 
     const user = await userRepository.findOneBy({id: userId});
@@ -33,17 +36,36 @@ export async function updateProfile(req, res) {
       return handleErrorClient(res, 404, "Usuario no encontrado");
     }
 
-    if(email) user.email = email;
-    if(password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
+    Object.assign(user, value); 
+
+    //No hay email igual
+    if(value.email){
+      const existingEmail = await userRepository.findOneBy({email: value.email});
+      if(existingEmail && existingEmail.id !== userId){
+        return handleErrorClient(res, 409, "El email ya está en uso por otro usuario");
+      }
+    }
+
+    //No hay rut igual
+    if(value.rut){
+      const existingRut = await userRepository.findOneBy({rut: value.rut});
+      if(existingRut && existingRut.id !== userId){
+        return handleErrorClient(res, 409, "El RUT ya existe en otro usuario");
+      }
+    }
+
+    if(value.password) {
+      const hashedPassword = await bcrypt.hash(value.password, 10);
       user.password = hashedPassword;
     }
       
 
     await userRepository.save(user);
     handleSuccess(res, 200, "Perfil actualizado exitosamente", {
-        id: user.id,
-        email: user.email,
+      id: user.id,
+      nombre: user.nombre,
+      rut: user.rut,
+      email: user.email,
       });
 
   }catch(error){
