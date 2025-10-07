@@ -20,17 +20,6 @@ export const User = new EntitySchema({
       length: 255,
       nullable: false,
     },
-    rut: {
-      type: "varchar",
-      length: 12, 
-      unique: true,
-      nullable: false,
-    },
-    nombre: {
-      type: "varchar",
-      length: 100,
-      nullable: false,
-    },
     created_at: {
       type: "timestamp",
       createDate: true,

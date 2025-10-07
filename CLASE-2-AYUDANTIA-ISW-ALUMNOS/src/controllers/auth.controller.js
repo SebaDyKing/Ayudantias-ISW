@@ -20,7 +20,6 @@ export async function login(req, res) {
 
 export async function register(req, res) {
   try {
-    console.log("REQ BODY:", req.body); // 👈 agrega esto
     const {error,value} = validateUser(req.body);
 
     if(error){
@@ -33,7 +32,7 @@ export async function register(req, res) {
     handleSuccess(res, 201, "Usuario creado exitosamente", newUser);
   } catch (error) {
     if (error.code === '23505') { 
-      handleErrorClient(res, 409, "El email o el rut  ya están registrado");
+      handleErrorClient(res, 409, "El email ya está registrado");
     } else {
       handleErrorServer(res, 500, "Error interno del servidor", error.message);
     }

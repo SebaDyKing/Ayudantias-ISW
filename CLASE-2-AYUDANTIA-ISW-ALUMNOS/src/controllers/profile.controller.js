@@ -38,35 +38,20 @@ export async function updateProfile(req, res) {
 
     Object.assign(user, value); 
 
-    //hay email igual
-    if(value.email){
-      const existingEmail = await userRepository.findOneBy({email: value.email});
-      if(existingEmail && existingEmail.id !== userId){
-        return handleErrorClient(res, 409, "El email ya está en uso por otro usuario");
-      }
-    }
-
-    //hay rut igual
-    if(value.rut){
-      const existingRut = await userRepository.findOneBy({rut: value.rut});
-      if(existingRut && existingRut.id !== userId){
-        return handleErrorClient(res, 409, "El RUT ya existe en otro usuario");
-      }
-    }
-
     if(value.password) {
       const hashedPassword = await bcrypt.hash(value.password, 10);
       user.password = hashedPassword;
     }
-      
+    //Que no se cambie la id
+    if (value.id && value.id !== userId) {
+      delete value.id;
+    }
 
     await userRepository.save(user);
     handleSuccess(res, 200, "Perfil actualizado exitosamente", {
       id: user.id,
-      nombre: user.nombre,
-      rut: user.rut,
       email: user.email,
-      });
+    });
 
   }catch(error){
    handleErrorServer(res, 500, "Error al actualizar el perfil", error.message);
