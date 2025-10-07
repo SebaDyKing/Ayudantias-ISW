@@ -1,6 +1,6 @@
 import { handleSuccess, handleErrorClient, handleErrorServer } from "../Handlers/responseHandlers.js";
-import { AppDataSource } from "../config/configDB.js";
-import { User } from "../entities/User.entity.js"; 
+import { AppDataSource } from "../config/configDb.js";
+import { User } from "../entities/user.entity.js"; 
 import { validatePartialUser } from "../validations/user.validation.js";
 import bcrypt from "bcrypt";
 
