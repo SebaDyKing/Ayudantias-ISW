@@ -38,7 +38,7 @@ export async function updateProfile(req, res) {
 
     Object.assign(user, value); 
 
-    //No hay email igual
+    //hay email igual
     if(value.email){
       const existingEmail = await userRepository.findOneBy({email: value.email});
       if(existingEmail && existingEmail.id !== userId){
@@ -46,7 +46,7 @@ export async function updateProfile(req, res) {
       }
     }
 
-    //No hay rut igual
+    //hay rut igual
     if(value.rut){
       const existingRut = await userRepository.findOneBy({rut: value.rut});
       if(existingRut && existingRut.id !== userId){
@@ -73,6 +73,8 @@ export async function updateProfile(req, res) {
   }
 
 }
+
+
 export async function deleteProfile(req, res) {
   try{
     
