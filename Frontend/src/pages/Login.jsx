@@ -1,15 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log({ email, password });
-    };    return (
+        try {
+            const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+        
+            const { token, user } = response.data.data;
+
+            login(token, user);
+            console.log('Login successful:', response.data);
+            navigate('/home');
+        }catch (error) {
+            console.error('Error during login:', error);
+        }
+    }    
+    return (
         <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md transform transition-all hover:scale-105">
                 <form className="space-y-6" onSubmit={handleSubmit}>
