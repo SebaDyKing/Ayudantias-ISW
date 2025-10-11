@@ -10,12 +10,27 @@ export function getPublicProfile(req, res) {
   });
 }
 
-export function getPrivateProfile(req, res) {
+export async function getPrivateProfile(req, res) {
   const user = req.user;
+  const userRepository = AppDataSource.getRepository(User);
+
+  const fullUser = await userRepository.findOne({ 
+    where : { id: user.sub },
+    select : ["id","email","password"]
+  });
+
+  if (!fullUser) {
+    return handleErrorClient(res, 404, "No registrado");
+  }
+
 
   handleSuccess(res, 200, "Perfil privado obtenido exitosamente", {
     message: `¡Hola, ${user.email}! Este es tu perfil privado. Solo tú puedes verlo.`,
-    userData: user,
+    userData: {
+      id: fullUser.id,
+      email: fullUser.email,
+      password: fullUser.password
+    },
   });
 }
 
