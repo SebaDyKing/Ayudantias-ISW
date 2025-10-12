@@ -6,6 +6,7 @@ import Error404 from '@pages/Error404';
 import Root from '@pages/Root';
 import ProtectedRoute from '@components/ProtectedRoute';
 import '@styles/styles.css';
+import Register from '@pages/Register'
 
 const router = createBrowserRouter([
   {
@@ -27,7 +28,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/register',
-        element: <div className="min-h-screen flex items-center justify-center text-3xl font-poppins">Página de Registro (En construcción)</div>
+        element: <Register />
       }
     ]
   }
