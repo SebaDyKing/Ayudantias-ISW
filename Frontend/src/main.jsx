@@ -24,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: '/home',
         element: <Home />
+      },
+      {
+        path: '/register',
+        element: <div className="min-h-screen flex items-center justify-center text-3xl font-poppins">Página de Registro (En construcción)</div>
       }
     ]
   }

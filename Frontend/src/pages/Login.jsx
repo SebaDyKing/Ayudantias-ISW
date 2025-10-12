@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login} = useAuth();
+    const {login} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -28,6 +28,7 @@ const Login = () => {
         <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md transform transition-all hover:scale-105">
                 <form className="space-y-6" onSubmit={handleSubmit}>
+
                     <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 mb-8">
                         Iniciar sesión
                     </h1>
@@ -62,12 +63,20 @@ const Login = () => {
                         />
                     </div>
 
-                    <button 
-                        type="submit" 
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300"
-                    >
-                        Iniciar sesión
-                    </button>
+                    <div className="flex space-x-4">
+                        <button 
+                            type="submit" 
+                            className="w-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300"
+                        >
+                            Iniciar sesión
+                        </button>
+
+                        <button 
+                            className="w-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300"
+                        >
+                            <a href="/register" className="block w-full h-full text-white no-underline">Registrarse</a>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
