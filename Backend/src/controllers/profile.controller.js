@@ -51,6 +51,13 @@ export async function updateProfile(req, res) {
       return handleErrorClient(res, 404, "Usuario no encontrado");
     }
 
+    if(value.email){
+      const existingUser =  await userRepository.findOneBy({email: value.email});
+      if(existingUser && existingUser.id !== userId){
+        return handleErrorClient(res, 409, "El correo electrónico ya está en uso por otro usuario");
+      }
+    }
+
     Object.assign(user, value); 
 
     if(value.password) {

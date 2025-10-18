@@ -10,13 +10,17 @@ import { use } from "react";
 
 const app = express();
 
+
 const corsOptions = {
   origin: 'http://localhost:5173',
   methods: ['GET','POST','PATCH','DELETE'],
-  allowedHeaders: ['Content-Type','Authorization','Accept']
+  allowedHeaders: ['Content-Type','Authorization','Accept'],
+  credentials : true
 };
 
-app.use(cors(corsOptions));
+
+app.use(cors(corsOptions)) 
+
 app.use(express.json());
 app.use(morgan("dev"));
 // Ruta principal de bienvenida
