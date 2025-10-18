@@ -5,7 +5,6 @@ import { AppDataSource, connectDB } from "./config/configDb.js";
 import cors from "cors";
 import { routerApi } from "./routes/index.routes.js";
 import {HOST,PORT} from "./config/configEnv.js"
-import { use } from "react";
 
 
 const app = express();
