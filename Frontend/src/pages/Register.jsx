@@ -1,11 +1,9 @@
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
 
 export const Register = () => {
     const navigate = useNavigate();
-    const {login} = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,8 +24,6 @@ export const Register = () => {
     }
     try{
         const response = await axios.post(`${API_BASE_URL}/auth/register`, { email, password});
-        const {token,user } = response.data.data
-
         alert("Cuenta Creada con exito, Porfavor inicia session")
 
         navigate('/auth')
