@@ -24,8 +24,8 @@ export const Register = () => {
     }
     try{
         const response = await axios.post(`${API_BASE_URL}/auth/register`, { email, password});
+        console.log('Registration successful! Server response:', response.data);
         alert("Cuenta Creada con exito, Porfavor inicia session")
-
         navigate('/auth')
     }catch(error){
         console.error('Error during registration:', error);

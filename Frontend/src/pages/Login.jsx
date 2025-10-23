@@ -14,9 +14,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
-        
             const { token, user } = response.data.data;
-
             login(token, user);
             console.log('Login successful:', response.data);
             navigate('/home');
