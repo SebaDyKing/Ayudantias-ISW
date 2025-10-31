@@ -7,7 +7,7 @@ import QRCode from 'qrcode'
 
 import { ProfileView } from '../components/ProfileView';
 import { ProfileEditForm } from '../components/ProfileEditForm';
-import { QRButton } from '../components/QRButton';
+import { EscanearQR } from '../components/EscanearQR';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -25,8 +25,10 @@ const Home = () => {
   const [success,setSuccess] = useState()
   const [loading,setLoading] = useState()
   const [qrCodeUrl,setQrCodeUrl] = useState('')
-
   const navigate = useNavigate();
+
+  const [isScannerVisible, setIsScannerVisible] = useState(false);
+  const [scannedUserData, setScannedUserData] = useState(null); 
 
   const handleGetProfile = async () => {
     const token = Cookies.get('jwt-auth');
@@ -35,7 +37,7 @@ const Home = () => {
       console.error('No se encontro token de autenticacion')
       return;
     }
-    try {    
+    try {     
       const response = await axios.get(`${API_BASE_URL}/profile/private`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -59,7 +61,7 @@ const Home = () => {
       passwordConfirm:''
     })
     setError('')
-    setSuccess('')
+    setSuccess('')   
   }
 
   const handleCancelEdit = () =>{
@@ -89,7 +91,7 @@ const Home = () => {
     setSuccess('')
     setLoading(true)
 
-      const {password,passwordConfirm} = formData      
+      const {password,passwordConfirm} = formData       
       if(password !== passwordConfirm){
         setError('Las contraseñas no coinciden')
         setLoading (false)
@@ -135,7 +137,7 @@ const Home = () => {
       setLoading(false)
     }
   }
-const handleDelete = async (user) => {
+const handleDelete = async () => { 
   if(!window.confirm('¿Estás seguro de que deseas eliminar tu perfil? Esta acción no se puede deshacer.')){
     return
   }
@@ -165,6 +167,8 @@ const handleGetQR = async (e) => {
   e.preventDefault()
   setLoading(true)
   setError('')
+  setIsScannerVisible(false); 
+  setScannedUserData(null); 
 
   if(!profileData?.data?.userData?.email){
     setError('No se pudo obtener el email del perfil')
@@ -173,14 +177,18 @@ const handleGetQR = async (e) => {
   }
 
   try{
+    const currentData = profileData.data.userData;
+
     const user = {
-      email: formData.email.trim(),
-      nombre: formData.nombre.trim(),
-      rut: formData.rut.trim(),
-      rol: formData.rol.trim()
+      email: currentData.email,
+      nombre: currentData.nombre,
+      rut: currentData.rut,
+      rol: currentData.rol
     }
     
+    console.log(user)
     const qrData = JSON.stringify(user)
+    console.log(qrData)
 
     const qrUrl = await QRCode.toDataURL(qrData,{
       width: 400,
@@ -189,7 +197,6 @@ const handleGetQR = async (e) => {
       dark: '#000000',
       light: '#FFFFFF'
     }})
-
     setQrCodeUrl(qrUrl)
     setError('')
 
@@ -199,6 +206,28 @@ const handleGetQR = async (e) => {
     setLoading(false)
   }
 }
+
+const handleUserScanned = (scannedUser) => {
+    setError(''); 
+    setSuccess(`Usuario escaneado: ${scannedUser.nombre} (RUT: ${scannedUser.rut})`);
+    setScannedUserData(scannedUser); 
+    setIsScannerVisible(false); 
+    console.log("Usuario recibido en Home:", scannedUser);
+};
+
+const toggleScannerVisibility = () => {
+  const newVisibility = !isScannerVisible;
+  setIsScannerVisible(newVisibility);
+  
+  if (newVisibility) {
+    setQrCodeUrl(''); 
+    setScannedUserData(null); 
+    setError('');
+    setSuccess('');
+  }
+};
+
+
 return (
 <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4 font-sans">
       <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-4xl">
@@ -236,10 +265,29 @@ return (
                 handleDelete={handleDelete}
                 handleGetQR={handleGetQR}
                 qrCodeUrl={qrCodeUrl}
+                onToggleScanner={toggleScannerVisibility}
+                isScannerActive={isScannerVisible}
               />
             )}
           </div>
         )}
+
+        {isScannerVisible && (
+          <div className="mt-8 pt-8 border-t">
+            <EscanearQR onUserScanned={handleUserScanned} />
+          </div>
+        )}
+
+        {scannedUserData && !isScannerVisible && (
+            <div className="mt-8 p-6 border rounded-lg shadow-md bg-green-50">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">Datos del QR Escaneado:</h3>
+              <p><strong>Nombre:</strong> {scannedUserData.nombre}</p>
+              <p><strong>RUT:</strong> {scannedUserData.rut}</p>
+              <p><strong>Rol:</strong> {scannedUserData.rol}</p>
+              <p><strong>Email:</strong> {scannedUserData.email}</p>
+            </div>
+        )}
+
       </div>
     </div>
   );
