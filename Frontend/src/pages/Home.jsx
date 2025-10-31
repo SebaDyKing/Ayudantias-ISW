@@ -3,17 +3,25 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { updateProfile, deleteProfile} from '../services/profile.service';
 import { useNavigate } from 'react-router-dom';
-
+import QRCode from 'qrcode'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const Home = () => {
   const [profileData, setProfileData] = useState(null);
   const [editUser, setEditUser] = useState('')
-  const [formData,setFormData] = useState({email:'', password:'',passwordConfirm:''})
+  const [formData,setFormData] = useState({
+    nombre:'',
+    rut:'',
+    rol:'',
+    email:'', 
+    password:'',
+    passwordConfirm:''})
   const [error,setError] = useState('') 
   const [success,setSuccess] = useState()
   const [loading,setLoading] = useState()
+  const [qrCodeUrl,setQrCodeUrl] = useState('')
+
   const navigate = useNavigate();
 
   const handleGetProfile = async () => {
@@ -39,6 +47,9 @@ const Home = () => {
   const handleEdit = (user) => {
     setEditUser(user)
     setFormData({
+      nombre: user.nombre || '',
+      rut: user.rut || '',
+      rol: user.rol || '',
       email: user.email,
       password:'',
       passwordConfirm:''
@@ -50,6 +61,9 @@ const Home = () => {
   const handleCancelEdit = () =>{
     setEditUser(null)
     setFormData({
+      nombre: '',
+      rut: '',
+      rol: '',
       email: '',
       password:'',
       passwordConfirm:''
@@ -57,7 +71,6 @@ const Home = () => {
     setError('')
   }
  
-// Cada vez que el usuario presione una tecla se ejecuta esta funcion(Permitir cambios)
     const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -80,7 +93,10 @@ const Home = () => {
       }
 
       const dataUpdate = {
-        email: formData.email,
+      nombre: formData.nombre,
+      rut: formData.rut,
+      rol: formData.rol,
+      email: formData.email,
       }
 
       if(password){
@@ -141,129 +157,213 @@ const handleDelete = async (user) => {
   }
 }
 
+const handleGetQR = async (e) => {
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+
+  if(!profileData?.data?.userData?.email){
+    setError('No se pudo obtener el email del perfil')
+    setLoading(false)
+    return
+  }
+
+  try{
+    const user = {
+      email: formData.email.trim(),
+      nombre: formData.nombre.trim(),
+      rut: formData.rut.trim(),
+      rol: formData.rol.trim()
+    }
+    
+    const qrData = JSON.stringify(user)
+
+    const qrUrl = await QRCode.toDataURL(qrData,{
+      width: 400,
+      margin: 2,
+      color: {
+      dark: '#000000',
+      light: '#FFFFFF'
+    }})
+
+    setQrCodeUrl(qrUrl)
+    setError('')
+
+  }catch(error){
+    setError("Error")
+  }finally{
+    setLoading(false)
+  }
+}
 return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4 font-sans">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-3xl transform transition-all hover:scale-105">
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 font-sans">
-                Sistema de Perfiles - Usuario
-            </h1>
-            
-            <h2 className="text-lg text-center text-gray-600 mb-4">
-                Haz clic para cargar tu perfil:
-            </h2>
-            <button 
-                onClick={handleGetProfile} 
-                className="w-full bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.01]"
-            >
-                Mostrar Perfil
-            </button>
+    <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-3xl transform transition-all hover:scale-105">
+      <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 font-sans">
+        Sistema de Perfiles - Usuario
+      </h1>
 
-            {success && (
-                <div className="mt-6 p-3 rounded-lg bg-green-100 border border-green-400 text-green-700 font-semibold text-center">
-                    Éxito: {success}
-                </div>
-            )}
-            
-            {error && (
-                <div className="mt-6 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700 font-semibold text-center">
-                    Error: {error}
-                </div>
-            )}
+      <h2 className="text-lg text-center text-gray-600 mb-4">
+        Haz clic para cargar tu perfil:
+      </h2>
+      <button
+        onClick={handleGetProfile}
+        className="w-full bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.01]"
+      >
+        Mostrar Perfil
+      </button>
 
-            {profileData && (
-                <div className="mt-8">
-                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-                        Lista de Usuarios (1)
-                    </h2>
-                    
-                    <div className="bg-gray-50 rounded-xl shadow-lg p-6 border border-gray-200">
-                        
-                        {editUser ? (
-                            <form onSubmit={handleUpdate} className="space-y-4">
-                                <h3 className="text-xl font-semibold mb-3">Editando Perfil (ID: {editUser.sub})</h3>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Email:</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Contraseña Nueva:</label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        className="mt-1 w-full rounded-md border border-gray-300 p-2"
-                                    />
-                                    <label className="block text-sm font-medium text-gray-700 mt-2">Confirmar Contraseña:</label>
-                                    <input
-                                        type="password"
-                                        name="passwordConfirm"
-                                        value={formData.passwordConfirm}
-                                        onChange={handleInputChange}
-                                        placeholder="Confirma tu contraseña"
-                                        className="mt-1 w-full rounded-md border border-gray-300 p-2 mt-2"
-                                    />
-                                </div>
-                                
-                                <div className="flex space-x-4 pt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
-                                    >
-                                        {loading ? 'Guardando...' : 'Guardar Cambios'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleCancelEdit}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
-                                    >
-                                        Cancelar
-                                    </button>
-                                </div>
-                            </form>
-                        ) : (
-                            <div>
-                                <h3 className="text-xl font-semibold text-indigo-700 mb-2">
-                                    {profileData.data.userData.email} (Perfil Actual)
-                                </h3>
-                                
-                                <p className="text-base text-gray-700 mb-1">
-                                    <span className="font-semibold text-gray-900">ID:</span> {profileData.data.userData.id}
-                                </p>
-                                <p className="text-base text-gray-700 mb-1">
-                                    <span className="font-semibold text-gray-900">Contraseña (Hash):</span> {profileData.data.userData.password}
-                                </p>
-                                
-                                <div className="mt-4 pt-3 border-t border-gray-200 space-x-3">
-                                    <button
-                                        onClick={() => handleEdit(profileData.data.userData)} 
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                                    >
-                                        Editar
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete()}
-                                        className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
-                                    >
-                                        Eliminar Perfil
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+      {success && (
+        <div className="mt-6 p-3 rounded-lg bg-green-100 border border-green-400 text-green-700 font-semibold text-center">
+          Éxito: {success}
         </div>
+      )}
+
+      {error && (
+        <div className="mt-6 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700 font-semibold text-center">
+          Error: {error}
+        </div>
+      )}
+
+      {profileData && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+            Lista de Usuarios (1)
+          </h2>
+
+          <div className="bg-gray-50 rounded-xl shadow-lg p-6 border border-gray-200">
+            {editUser ? (
+              <form onSubmit={handleUpdate} className="space-y-4">
+                <h3 className="text-xl font-semibold mb-3">Editando Perfil (ID: {editUser.sub})</h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Nombre:</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">RUT:</label>
+                  <input
+                    type="text"
+                    name="rut"
+                    value={formData.rut}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Rol:</label>
+                  <input
+                    type="text"
+                    name="rol"
+                    value={formData.rol}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email:</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Contraseña Nueva:</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2"
+                  />
+                  <label className="block text-sm font-medium text-gray-700 mt-2">Confirmar Contraseña:</label>
+                  <input
+                    type="password"
+                    name="passwordConfirm"
+                    value={formData.passwordConfirm}
+                    onChange={handleInputChange}
+                    placeholder="Confirma tu contraseña"
+                    className="mt-1 w-full rounded-md border border-gray-300 p-2 mt-2"
+                  />
+                </div>
+
+                <div className="flex space-x-4 pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                  >
+                    {loading ? 'Guardando...' : 'Guardar Cambios'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div>
+                <h3 className="text-xl font-semibold text-indigo-700 mb-2">
+                  {profileData.data.userData.nombre} ({profileData.data.userData.email})
+                </h3>
+
+                <p className="text-base text-gray-700 mb-1">
+                  <span className="font-semibold text-gray-900">RUT:</span> {profileData.data.userData.rut}
+                </p>
+                <p className="text-base text-gray-700 mb-1">
+                  <span className="font-semibold text-gray-900">Rol:</span> {profileData.data.userData.rol}
+                </p>
+                <p className="text-base text-gray-700 mb-1">
+                  <span className="font-semibold text-gray-900">ID:</span> {profileData.data.userData.id}
+                </p>
+
+                <div className="mt-4 pt-3 border-t border-gray-200 space-x-3">
+                  <button
+                    onClick={() => handleEdit(profileData.data.userData)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete()}
+                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+                  >
+                    Eliminar Perfil
+                  </button>
+                </div>
+
+ 
+                <button
+                  onClick={handleGetQR}
+                  className="w-full bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-700 transition-all duration-300 transform hover:scale-[1.01] mt-4"
+                >
+                  Obtener QR
+                </button>
+
+                {qrCodeUrl && (
+                  <div className="mt-4 flex justify-center">
+                    <img src={qrCodeUrl} alt="QR Code" className="rounded-xl border border-gray-300" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+  </div>
+
 );
 }
 export default Home;

@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('usuario');
     setUser(null);
   };
+  
   //Guarda el token en cookies y el usuario en session
   const login = (token, user) => {
     cookies.set('jwt-auth', token, { expires: 7 }); 

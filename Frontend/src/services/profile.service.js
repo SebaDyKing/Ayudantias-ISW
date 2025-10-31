@@ -12,7 +12,6 @@ export async function getProfile() {
 }
 
 export async function updateProfile(userData){
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
     const token = Cookies.get('jwt-auth');
     try {
         const response = await axios.patch(`/profile/private`,userData,{
