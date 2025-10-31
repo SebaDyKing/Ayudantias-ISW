@@ -16,7 +16,7 @@ export async function getPrivateProfile(req, res) {
 
   const fullUser = await userRepository.findOne({ 
     where : { id: user.sub },
-    select : ["id","email","password"]
+    select : ["nombre","rut","rol","id","email","password"]
   });
 
   if (!fullUser) {
@@ -28,6 +28,9 @@ export async function getPrivateProfile(req, res) {
     message: `¡Hola, ${user.email}! Este es tu perfil privado. Solo tú puedes verlo.`,
     userData: {
       id: fullUser.id,
+      nombre:fullUser.nombre,
+      rut:fullUser.rut,
+      rol:fullUser.rol,
       email: fullUser.email,
       password: fullUser.password
     },

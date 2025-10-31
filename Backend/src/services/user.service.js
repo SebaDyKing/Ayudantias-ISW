@@ -9,6 +9,9 @@ export async function createUser(data) {
 
 
   const newUser = userRepository.create({
+    nombre:data.nombre,
+    rut:data.rut,
+    rol:data.rol,
     email: data.email,
     password: hashedPassword,
   });

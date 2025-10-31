@@ -1,5 +1,20 @@
 import Joi from "joi"
 export const userBodyValidation = Joi.object({
+  nombre: Joi.string().min(3).max(100).required().messages({
+      "string.empty": "El nombre es obligatorio",
+      "string.min": "El nombre debe tener al menos 3 caracteres",
+    }),
+    rut: Joi.string()
+      .pattern(/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]{1}$/)
+      .required()
+      .messages({
+        "string.empty": "El RUT es obligatorio",
+        "string.pattern.base": "El RUT debe tener el formato 12.345.678-9",
+      }),
+    rol: Joi.string().valid("owner", "guardia", "central").required().insensitive().messages({
+      "any.only": "El rol debe ser uno de: owner, guardia o central",
+      "string.empty": "El rol es obligatorio",
+    }),
   email: Joi.string().email().required().messages({
     "string.email": "Debe proporcionar un email valido"
   }),

@@ -5,7 +5,7 @@ import { handleSuccess, handleErrorClient, handleErrorServer } from "../Handlers
 
 export async function login(req, res) {
   try {
-    const { email, password } = req.body;
+    const {email, password } = req.body;
     
     if (!email || !password ) {
       return handleErrorClient(res, 400, "Email y contraseña son requeridos");
@@ -19,6 +19,7 @@ export async function login(req, res) {
 }
 
 export async function register(req, res) {
+  console.log(req.body)
   try {
     const {error,value} = validateUser(req.body);
 
