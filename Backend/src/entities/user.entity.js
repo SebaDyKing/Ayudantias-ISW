@@ -9,10 +9,26 @@ export const User = new EntitySchema({
       type: "int",
       generated: "increment",
     },
+    nombre: {
+      type: "varchar",
+      length: 100,
+      nullable: false,
+    },
     email: {
       type: "varchar",
       length: 255,
       unique: true,
+      nullable: false,
+    },
+    rut: {
+      type: "varchar",
+      length: 12,
+      unique: true,
+      nullable: false,
+    },
+    rol: {
+      type: "varchar",
+      length: 50,
       nullable: false,
     },
     password: {
